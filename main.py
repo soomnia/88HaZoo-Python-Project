@@ -1,9 +1,22 @@
 # 모듈이 인식이 안 되면
 # cmd + shift + p -> python select interpreter -> .venv 선택
 from fastapi import FastAPI
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 # app 객체 생성
 app = FastAPI()
+
+# APScheduler 인스턴스 생성
+scheduler  = AsyncIOScheduler()
+
+from crawling.web_crawling import crawling_news
+async def scheduledJob():
+    print("스케줄러가 작업을 실행합니다.")
+    await crawling_news()
+
+scheduler.add_job(scheduledJob, 'cron', hour='09', minute='30')
+
+scheduler.start()
 
 # 127.0.0.1:8000/
 @app.get("/")

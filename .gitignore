@@ -10,6 +10,3 @@ __pycache__
 .env
 
 router/db.py
-
-# test_tts
-# test_scheduler
