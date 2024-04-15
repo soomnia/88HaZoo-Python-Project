@@ -1,5 +1,7 @@
 *.xlsx
 *.csv
+*.txt
+*.wav
 
 .DS_store
 __pycache__
@@ -9,5 +11,5 @@ __pycache__
 
 router/db.py
 
-test_tts
-test_scheduler
+# test_tts
+# test_scheduler
