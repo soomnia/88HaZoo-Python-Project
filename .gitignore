@@ -1,1 +1,13 @@
 *.xlsx
+*.csv
+
+.DS_store
+__pycache__
+
+.venv
+.env
+
+router/db.py
+
+test_tts
+test_scheduler
