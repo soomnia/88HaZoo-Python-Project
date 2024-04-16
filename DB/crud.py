@@ -1,5 +1,5 @@
-from models import News
-from schemas import NewsCreate, NewsUpdate
+from DB.models import News
+from DB.schemas import NewsCreate, NewsUpdate
 from sqlalchemy.orm import Session
 
     # ## 제목, 언론사, 작성일, 링크, 전체 내용

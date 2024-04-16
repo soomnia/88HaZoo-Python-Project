@@ -31,4 +31,5 @@ class News(NewsBase):
     items: List[NewsBase]
 
     class Config:
-        orm_mode = True
+        ## * 'orm_mode' has been renamed to 'from_attributes'
+        from_attributes = True
