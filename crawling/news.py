@@ -1,23 +1,44 @@
-from crawling.naver_it_news import NEWS_URL_LIST
-from crawling.naver_it_news import get_yesterday
+from crawling.define import BASE_URL, CATEGORY_LIST, get_category
+from crawling.utils import save_csv_file, insert_news_file
 
-# import
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 import time
 import pandas as pd
 
-## ??
-import asyncio
+def get_yesterday():
+    # 오늘 날짜 구하기
+    today = datetime.now()
 
-async def save_in_db():
-    try:
-        await create_upload_file()
-        print("?")
-        return {"message": "성공!!"}
-    except:
-        return {"error" : "save_in_db 에러"} 
+    # 오늘에서 하루 빼서 어제 날짜 구하기
+    yesterday = today - timedelta(1)
+    # print(yesterday)
+
+    # 형변환해서 필요한 연월일만 슬라이싱
+    yesterday = str(yesterday)[:10]
+    # print(yesterday)
+
+    # 쿼리에 쓰이도록 '-' 를 ''로 대체
+    yesterday = yesterday.replace('-', '')
+    # print(yesterday)
+
+    return yesterday
+
+# 최종적인 날짜 쿼리!
+yesterday = get_yesterday()
+url_query_date = f'?date={yesterday}'
+
+NEWS_URL_LIST = []
+
+for category in CATEGORY_LIST:
+    url = f"{BASE_URL}{category}{url_query_date}"
+    # print(url)
+    NEWS_URL_LIST.append({
+        'URL': url,
+        '카테고리': get_category(category)
+    })
 
 async def crawling_news():
     browser = webdriver.Chrome()
@@ -28,14 +49,25 @@ async def crawling_news():
         print('URL:', url['URL'])
         browser.get(url['URL'])
 
+        #기사 목록 최하단까지 크롤링하기 위한 '기사 더보기' 클릭    
+        more_button='a'
+        j=1
+        while len(more_button) > 0:
+            more_button=browser.find_element(By.CLASS_NAME,'_CONTENT_LIST_LOAD_MORE_BUTTON').text
+            if len(more_button) == 0:
+                print('마지막까지 내리기 완료')
+                break
+            browser.find_element(By.CLASS_NAME,'_CONTENT_LIST_LOAD_MORE_BUTTON').click()
+            print(f'{j}번째 클릭')
+            j+=1
+            time.sleep(3)
+        
         # 기사 컨테이너:
         ## class="sa_text"
         link_container_list = browser.find_elements(By.CLASS_NAME, 'sa_text')
         link_list = []
 
-        # 일단 기사 링크를 먼저 모으자
         for container in link_container_list:
-            ## 링크
             link = container.find_element(By.CLASS_NAME, 'sa_text_title').get_attribute("href")
 
             link_list.append({
@@ -58,9 +90,8 @@ async def crawling_news():
                 title = browser.find_element(By.ID, 'title_area').text
             except:
                 ## class="title"
-                # title = browser.find_element(By.CLASS_NAME, 'title').text
                 print("양식이 달라요")
-                # 다수의 것에서 벗어나는 것은 포함시키지 않기로 협의
+                # 다수의 양식에서 벗어나는 것은 포함시키지 않기로 협의
                 continue
 
             print("title:", title)
@@ -102,41 +133,8 @@ async def crawling_news():
     try:
         file_name = f"{get_yesterday()}_네이버_IT_과학_뉴스.csv"
         await save_csv_file(df, file_name)
-        time.sleep(3)
-        await create_upload_file(file_name)
+        time.sleep(1)
+        await insert_news_file(file_name)
         return {"message": "성공!!"}
     except:
         return {"error" : "에러 발생"} 
-
-## TODO: asyncio 알아봐야 함..
-async def save_csv_file(df: pd.DataFrame, file_name: str):
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, df.to_csv, file_name)
-
-from DB.database import SessionLocal
-import csv
-from DB.models import News
-
-async def create_upload_file(file_name: str):
-    db = SessionLocal()
-    try:
-        # CSV 파일 내용을 읽어서 데이터베이스에 저장
-        with open(file_name) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            ## 첫 번째 줄을 건너 뛰기! (칼럼 명)
-            next(csv_reader) 
-            for row in csv_reader:
-                print("data:", row)
-                item = News(category=row[1],
-                            title=row[2],
-                            press=row[3],
-                            date=row[4],
-                            link=row[5],
-                            content=row[6])
-                db.add(item)
-                db.commit()
-    except Exception as e:
-        db.rollback()
-        return {"error": f"create_upload_file - {str(e)}"}
-    finally:
-        db.close()
