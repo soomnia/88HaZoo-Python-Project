@@ -9,7 +9,8 @@ app = FastAPI()
 # APScheduler 인스턴스 생성
 scheduler  = AsyncIOScheduler()
 
-from crawling.web_crawling import crawling_news
+from crawling.news import crawling_news
+
 async def scheduledJob():
     print("스케줄러가 작업을 실행합니다.")
     await crawling_news()
@@ -27,8 +28,8 @@ def index():
 from router.news import router as news_router
 app.include_router(news_router)
 
-# from router.db import router as db_router
-# app.include_router(db_router)
+from router.weather import router as weather_router
+app.include_router(weather_router)
 
 # python main.py 로 실행했을 때 uvicorn 명령어로 실행시킨 것과 동일하게 하기 위함
 if __name__ == "__main__":
