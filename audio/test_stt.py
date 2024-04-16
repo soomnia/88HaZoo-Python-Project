@@ -10,7 +10,8 @@ def from_file():
 
     # 오디오 파일 열기
     with sr.AudioFile(audio_file) as source:
-        audio_data = recognizer.record(source)  # 오디오 데이터 읽기
+        # 오디오 데이터 읽기
+        audio_data = recognizer.record(source)
 
     try:
         # Google Web Speech API를 통해 음성 인식
@@ -57,4 +58,4 @@ def from_microphone():
     except sr.RequestError as e:
         print(f"Google Web Speech API 요청에 실패했습니다.\n{str(e)}")
 
-from_microphone()
+# from_microphone()
