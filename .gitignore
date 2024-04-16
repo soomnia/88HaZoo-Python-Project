@@ -1,7 +1,8 @@
 *.xlsx
 *.csv
-*.txt
 *.wav
+*.mp3
+*.png
 
 .DS_store
 __pycache__
@@ -9,4 +10,4 @@ __pycache__
 .venv
 .env
 
-router/db.py
+test
