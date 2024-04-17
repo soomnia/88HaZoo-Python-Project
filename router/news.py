@@ -27,18 +27,18 @@ async def crawling_it_news():
 #     db_news = crud.create_news(db, news)
 #     return db_news
 
-@router.get('/{news_id}')
-def get_news_id(news_data: Union[int, str], db: Session = Depends(dependencies.get_db)):
-    print(f'type: {news_data}')
-    print(f'type: {type(news_data)}')
+@router.get("/{news_index}")
+def get_news_id(news_index: int, db: Session = Depends(dependencies.get_db)):
+    print(f'type: {news_index}')
+    print(f'type: {type(news_index)}')
 
     try: 
-        news_data = int(news_data)
-        if isinstance(news_data, int):
-            db_news = crud.get_news_id(db, news_data)
+        news_index = int(news_index)
+        if isinstance(news_index, int):
+            db_news = crud.get_news_id(db, news_index)
     except:     
-        if isinstance(news_data, str):
-            db_news = crud.get_news_title(db, news_data)
+        if isinstance(news_index, str):
+            db_news = crud.get_news_title(db, index)
 
     if db_news is None:
         raise HTTPException(status_code=404, detail='News Not Found')
